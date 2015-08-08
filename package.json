@@ -1,6 +1,6 @@
 {
   "name": "vapor-verify-email",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Will enable SteamGuard on fresh accounts and thusly verify email.",
   "main": "lib/index.js",
   "scripts": {
