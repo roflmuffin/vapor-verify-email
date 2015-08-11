@@ -34,4 +34,7 @@ exports.plugin = (VaporAPI) ->
         request options, (err, resp, body) ->
           log.info 'Restarting to verify email.'
           VaporAPI.disconnect()
-          VaporAPI.connect()
+
+          setTimeout ->
+            VaporAPI.connect()
+          , 5000
