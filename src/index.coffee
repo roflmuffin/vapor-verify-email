@@ -12,13 +12,12 @@
 ###
 
 request = require 'request'
-fs = require 'fs'
 
 exports.name = 'verify-email'
 
 exports.plugin = (VaporAPI) ->
   Steam = VaporAPI.getSteam()
-  emailValidated = null
+  emailValidated = false
 
   VaporAPI.registerHandler {emitter: 'client', event: 'logOnReponse'}, (response) ->
     if response.eresult == Steam.EResult.OK
