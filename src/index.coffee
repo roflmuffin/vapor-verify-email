@@ -17,24 +17,29 @@ fs = require 'fs'
 exports.name = 'verify-email'
 
 exports.plugin = (VaporAPI) ->
+  Steam = VaporAPI.getSteam()
+  emailValidated = null
 
-  VaporAPI.registerHandler {emitter: 'vapor', event: 'cookies'}, (cookies) ->
+  VaporAPI.registerHandler {emitter: 'client', event: 'logOnReponse'}, (response) ->
+    if response.eresult == Steam.EResult.OK
+      emailValidated = response.account_flags & Steam.EAccountFlags.EmailValidated
+
+  VaporAPI.registerHandler {emitter: 'vapor', event: 'cookies'}, (cookies, sessionid) ->
     options =
       url: 'https://store.steampowered.com/twofactor/manage_action'
       method: 'POST'
       form:
-        sessionid: cookies[0].split('=')[1]
+        sessionid: sessionid
         action: 'email'
         email_authenticator_check: 'on'
       headers:
         'Cookie': cookies.join("; ")
 
-    this.emit 'readFile', this._sentryFile, (err, data) ->
-      if !data? # If we don't have a sentry file, restart to enter code & validate
-        request options, (err, resp, body) ->
-          VaporAPI.emitEvent('message:info', 'Restarting to verify email.')
-          VaporAPI.disconnect()
+    if !emailValidated # If our email isn't validated, send our request and restart the bot
+      request options, (err, resp, body) ->
+        VaporAPI.emitEvent('message:info', 'Restarting to verify email.')
+        VaporAPI.disconnect()
 
-          setTimeout ->
-            VaporAPI.connect()
-          , 5000
+        setTimeout ->
+          VaporAPI.connect()
+        , 5000
