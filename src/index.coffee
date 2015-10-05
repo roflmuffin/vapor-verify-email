@@ -20,7 +20,6 @@ exports.plugin = (VaporAPI) ->
   emailValidated = false
 
   VaporAPI.registerHandler {emitter: 'client', event: 'logOnResponse'}, (response) ->
-    console.log response
     if response.eresult == Steam.EResult.OK
       emailValidated = response.account_flags & Steam.EAccountFlags.EmailValidated
 
