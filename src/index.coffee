@@ -17,7 +17,6 @@ fs = require 'fs'
 exports.name = 'verify-email'
 
 exports.plugin = (VaporAPI) ->
-  log = VaporAPI.getLogger()
 
   VaporAPI.registerHandler {emitter: 'vapor', event: 'cookies'}, (cookies) ->
     options =
@@ -29,10 +28,11 @@ exports.plugin = (VaporAPI) ->
         email_authenticator_check: 'on'
       headers:
         'Cookie': cookies.join("; ")
-    fs.exists this.sentryFilePath, (exists) ->
-      if (!exists) # If our sentry file doesn't exist, we need to enable steamguard.
+
+    this.emit 'readFile', this._sentryFile, (err, data) ->
+      if !data? # If we don't have a sentry file, restart to enter code & validate
         request options, (err, resp, body) ->
-          log.info 'Restarting to verify email.'
+          VaporAPI.emitEvent('message:info', 'Restarting to verify email.')
           VaporAPI.disconnect()
 
           setTimeout ->
